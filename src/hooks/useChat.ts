@@ -21,20 +21,21 @@ export function useChat() {
       content: text
     };
 
-    setMessages(prev => [...prev, newUserMessage]);
-    setIsTyping(true);
-    setError(null);
-
     const botMessageId = (Date.now() + 1).toString();
     
-    // Add empty message placeholder that we will update
-    setMessages(prev => [
-      ...prev,
-      { id: botMessageId, role: 'model', content: '' }
-    ]);
+    let currentHistory: ChatMessage[] = [];
+
+    // Use functional state update to guarantee we have the latest history
+    setMessages(prev => {
+      currentHistory = [...prev, newUserMessage];
+      return [...currentHistory, { id: botMessageId, role: 'model', content: '' }];
+    });
+    
+    setIsTyping(true);
+    setError(null);
     
     try {
-      const stream = streamMessageToGemini(messages, text);
+      const stream = streamMessageToGemini(currentHistory);
       setIsTyping(false); // Stop typing indicator since we started streaming
 
       for await (const chunkText of stream) {

@@ -44,7 +44,7 @@ export interface ChatMessage {
   content: string;
 }
 
-export async function* streamMessageToGemini(history: ChatMessage[], newMessage: string) {
+export async function* streamMessageToGemini(history: ChatMessage[]) {
   const genAI = getGenAI();
   
   const formattedHistory = history.map(msg => ({
@@ -54,7 +54,7 @@ export async function* streamMessageToGemini(history: ChatMessage[], newMessage:
 
   const responseStream = await genAI.models.generateContentStream({
     model: 'gemini-3.1-flash-lite-preview',
-    contents: [...formattedHistory, { role: 'user', parts: [{ text: newMessage }] }],
+    contents: formattedHistory,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       temperature: 0.7,
